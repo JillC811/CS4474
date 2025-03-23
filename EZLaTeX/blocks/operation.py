@@ -8,30 +8,56 @@ class OperationBlock(Block):
         super().__init__(master, text=operation, font_size=font_size)
 
     def get_latex(self):
-        op = r"\div" if self.operation=="÷" else self.operation
-        return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ {op}$}}"
+        if self.operation == "x":
+            # For multiplication, output a dot
+            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ \cdot$}}"
+        elif self.operation == "/":
+            # For division, return empty string.
+            # The gather_latex() method will detect a "/" in a snapped group and convert the whole group into a fraction.
+            return ""
+        else:
+            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ {self.operation}$}}"
+
+    def update_display(self):
+        display = self.font_size if self.font_size <= 16 else int(self.font_size * DISPLAY_FONT_SCALE)
+        # For display, show a dot for multiplication and "/" for division.
+        if self.operation == "x":
+            text = "·"
+        else:
+            text = self.operation
+        self.widget.config(text=text, font=("Helvetica", display))
+
+    def delete_and_close(self, win):
+        self.master.editor.delete_block(self)
+        win.destroy()
 
     def edit(self, event):
         win = tk.Toplevel(self.master.winfo_toplevel())
         win.title("Edit Operation")
         win.geometry(f"+{self.widget.winfo_rootx()+MODAL_OFFSET}+{self.widget.winfo_rooty()+MODAL_OFFSET}")
-        win.transient(self.master.winfo_toplevel()); win.grab_set()
+        win.transient(self.master.winfo_toplevel())
+        win.grab_set()
 
-        combo = ttk.Combobox(win, values=["+","-","x","=","÷"], width=5)
-        combo.set(self.operation); combo.pack(pady=4)
+        # Updated operation choices: use "/" for division and "x" for multiplication (which displays as a dot)
+        combo = ttk.Combobox(win, values=["+", "-", "x", "=", "/"], width=5)
+        combo.set(self.operation)
+        combo.pack(pady=4)
         size_combo = ttk.Combobox(win, values=[str(s) for s in STANDARD_FONT_SIZES], width=5)
-        size_combo.set(str(self.font_size)); size_combo.pack(pady=4)
+        size_combo.set(str(self.font_size))
+        size_combo.pack(pady=4)
 
         def save():
             try:
-                size=int(size_combo.get())
+                size = int(size_combo.get())
             except ValueError:
                 return messagebox.showerror("Invalid", "Enter integer font size.")
-            self.font_size=min(STANDARD_FONT_SIZES, key=lambda s: abs(s-size))
-            self.operation=combo.get().strip() or self.operation
-            display=self.font_size if self.font_size<=16 else int(self.font_size*DISPLAY_FONT_SCALE)
-            self.widget.config(text=self.operation, font=("Helvetica", display))
+            self.font_size = min(STANDARD_FONT_SIZES, key=lambda s: abs(s - size))
+            self.operation = combo.get().strip() or self.operation
+            self.update_display()
             win.destroy()
+            # Propagate new font size to the snapped group
+            self.master.editor.propagate_font_size(self, self.font_size)
 
         tk.Button(win, text="Save", command=save).pack(pady=10)
+        tk.Button(win, text="Delete", command=lambda: self.delete_and_close(win)).pack(pady=5)
         win.wait_window()

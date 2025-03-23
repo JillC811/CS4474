@@ -3,7 +3,9 @@ import tkinter as tk
 DISPLAY_FONT_SCALE = 0.85
 STANDARD_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36]
 MODAL_OFFSET = 10
-SNAP_DISTANCE = 20
+SNAP_DISTANCE = 10
+VERTICAL_THRESHOLD = 10
+
 
 class Block:
     def __init__(self, master, text="Block", font_size=10):
@@ -34,9 +36,9 @@ class Block:
             ox, oy = other.widget.winfo_x(), other.widget.winfo_y()
             ow = other.widget.winfo_width()
 
-            if abs(new_x - (ox + ow)) < SNAP_DISTANCE:
+            if abs(new_x - (ox + ow)) < SNAP_DISTANCE and abs(new_y - oy) < VERTICAL_THRESHOLD:
                 new_x, new_y = ox + ow, oy
-            elif abs((new_x + ww) - ox) < SNAP_DISTANCE:
+            elif abs((new_x + ww) - ox) < SNAP_DISTANCE and abs(new_y - oy) < VERTICAL_THRESHOLD:
                 new_x, new_y = ox - ww, oy
 
         self.widget.place(x=new_x, y=new_y)
