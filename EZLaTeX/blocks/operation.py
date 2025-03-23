@@ -8,19 +8,26 @@ class OperationBlock(Block):
         super().__init__(master, text=operation, font_size=font_size)
 
     def get_latex(self):
+        """
+        Returns raw LaTeX code (without math mode delimiters) for the operation.
+         - For multiplication ("x"), return \cdot.
+         - For division ("/"), return empty string so gather_latex treats it as fraction divider.
+         - For "(" and ")", return auto-sizing delimiters using \left( and \right).
+         - Otherwise, return the literal symbol.
+        """
         if self.operation == "x":
-            # For multiplication, output a dot
-            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ \cdot$}}"
+            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ \cdot}}"
         elif self.operation == "/":
-            # For division, return empty string.
-            # The gather_latex() method will detect a "/" in a snapped group and convert the whole group into a fraction.
             return ""
+        elif self.operation == "(":
+            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ \left(}}"
+        elif self.operation == ")":
+            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ \right)}}"
         else:
-            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ {self.operation}$}}"
+            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ {self.operation}}}"
 
     def update_display(self):
         display = self.font_size if self.font_size <= 16 else int(self.font_size * DISPLAY_FONT_SCALE)
-        # For display, show a dot for multiplication and "/" for division.
         if self.operation == "x":
             text = "·"
         else:
@@ -38,10 +45,11 @@ class OperationBlock(Block):
         win.transient(self.master.winfo_toplevel())
         win.grab_set()
 
-        # Updated operation choices: use "/" for division and "x" for multiplication (which displays as a dot)
-        combo = ttk.Combobox(win, values=["+", "-", "x", "=", "/"], width=5)
+        # Allow the user to choose among common operations including parentheses.
+        combo = ttk.Combobox(win, values=["+", "-", "x", "=", "/", "(", ")"], width=5)
         combo.set(self.operation)
         combo.pack(pady=4)
+
         size_combo = ttk.Combobox(win, values=[str(s) for s in STANDARD_FONT_SIZES], width=5)
         size_combo.set(str(self.font_size))
         size_combo.pack(pady=4)
@@ -55,7 +63,6 @@ class OperationBlock(Block):
             self.operation = combo.get().strip() or self.operation
             self.update_display()
             win.destroy()
-            # Propagate new font size to the snapped group
             self.master.editor.propagate_font_size(self, self.font_size)
 
         tk.Button(win, text="Save", command=save).pack(pady=10)

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.3.12)  21 MAR 2025 13:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.3.12)  23 MAR 2025 12:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -179,8 +179,9 @@ LaTeX Font Info:    ... okay on input line 5.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
+LaTeX Font Info:    Calculating math sizes for size <24> on input line 8.
 
-Overfull \hbox (15.0pt too wide) in paragraph at lines 11--12
+Overfull \hbox (15.0pt too wide) in paragraph at lines 9--10
 [][] 
  []
 
@@ -194,18 +195,18 @@ L3 programming layer <2024-01-04>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 1755 strings out of 474486
- 27767 string characters out of 5743755
+ 1776 strings out of 474486
+ 28097 string characters out of 5743755
  1925542 words of memory out of 5000000
- 24084 multiletter control sequences out of 15000+600000
- 558523 words of font info for 38 fonts, out of 8000000 for 9000
+ 24103 multiletter control sequences out of 15000+600000
+ 561482 words of font info for 48 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,7n,65p,222b,142s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,9n,65p,222b,169s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/justi/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
-cmmi10.pfb><C:/Users/justi/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmr10.pfb><C:/Users/justi/AppData/Local/Programs/MiKTeX/fonts/type1/pu
-blic/amsfonts/cm/cmr7.pfb>
-Output written on preview.pdf (1 page, 26263 bytes).
+cmex10.pfb><C:/Users/justi/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmmi12.pfb><C:/Users/justi/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr12.pfb>
+Output written on preview.pdf (1 page, 26319 bytes).
 PDF statistics:
  21 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

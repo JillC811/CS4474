@@ -8,7 +8,7 @@ class FractionBlock(Block):
         super().__init__(master, text=f"{numerator}/{denominator}", font_size=font_size)
 
     def get_latex(self):
-        return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ \frac{{{self.numerator}}}{{{self.denominator}}}$}}"
+        return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ \frac{{{self.numerator}}}{{{self.denominator}}}}}"
 
     def update_display(self):
         display = self.font_size if self.font_size <= 16 else int(self.font_size * DISPLAY_FONT_SCALE)

@@ -15,7 +15,6 @@ def extract_math(expr):
         return expr[first+1:last]
     return expr
 
-
 from blocks.exponent import ExponentBlock
 from blocks.fraction import FractionBlock
 from blocks.operation import OperationBlock
@@ -119,12 +118,27 @@ class LaTeXEditor:
             return r"\mbox{}"
         lines = [r"\setlength{\unitlength}{1pt}", r"\begin{picture}(612,792)"]
         for group in groups:
-            # Check if the group contains an OperationBlock with "/" as the operation.
-            if any(isinstance(b, OperationBlock) and b.operation == "/" for b in group):
-                # Partition group into left and right parts around the first "/" operator.
+            # Sort blocks left-to-right.
+            sorted_group = sorted(group, key=lambda blk: blk.widget.winfo_x())
+            # Use the first block as reference for position and font size.
+            first_block = sorted_group[0]
+            x = first_block.widget.winfo_x()
+            y_inv = 792 - first_block.widget.winfo_y()
+
+            # Check if the group is enclosed in parentheses:
+            wrap_in_parens = (
+                isinstance(sorted_group[0], OperationBlock) and sorted_group[0].operation == "(" and
+                isinstance(sorted_group[-1], OperationBlock) and sorted_group[-1].operation == ")"
+            )
+            if wrap_in_parens:
+                # Remove the outer parentheses from the group.
+                sorted_group = sorted_group[1:-1]
+
+            # Check if the group contains a division slash.
+            if any(isinstance(b, OperationBlock) and b.operation == "/" for b in sorted_group):
                 left, right = [], []
                 found_slash = False
-                for b in group:
+                for b in sorted_group:
                     if isinstance(b, OperationBlock) and b.operation == "/":
                         found_slash = True
                         continue
@@ -132,30 +146,21 @@ class LaTeXEditor:
                         left.append(b)
                     else:
                         right.append(b)
-                # Extract plain math content from left and right parts.
-                left_content = "".join(extract_math(b.get_latex().strip()) for b in left)
-                right_content = "".join(extract_math(b.get_latex().strip()) for b in right)
-                first = left[0] if left else group[0]
-                x = first.widget.winfo_x()
-                y_inv = 792 - first.widget.winfo_y()
-                # Form a single fraction without nested $ signs.
-                combined = rf"\frac{{{left_content}}}{{{right_content}}}"
-                # Wrap the combined fraction in math mode once.
-                lines.append(fr"\put({x},{y_inv}){{\makebox(0,0)[lt]{{\fontsize{{{first.font_size}pt}}{{{first.font_size+2}pt}}\selectfont ${combined}$}}}}")
+                left_content = "".join(b.get_latex().strip() for b in left)
+                right_content = "".join(b.get_latex().strip() for b in right)
+                combined_expr = rf"\frac{{{left_content}}}{{{right_content}}}"
             else:
-                sorted_group = sorted(group, key=lambda blk: blk.widget.winfo_x())
-                first = sorted_group[0]
-                x = first.widget.winfo_x()
-                y_inv = 792 - first.widget.winfo_y()
-                combined = "".join(b.get_latex().strip() for b in sorted_group)
-                lines.append(fr"\put({x},{y_inv}){{\makebox(0,0)[lt]{{{combined}}}}}")
+                combined_expr = "".join(b.get_latex().strip() for b in sorted_group)
+
+            if wrap_in_parens:
+                combined_expr = rf"\left({combined_expr}\right)"
+
+            combined_wrapped = rf"\fontsize{{{first_block.font_size}pt}}{{{first_block.font_size+2}pt}}\selectfont ${combined_expr}$"
+            lines.append(fr"\put({x},{y_inv}){{\makebox(0,0)[lt]{{{combined_wrapped}}}}}")
         lines.append(r"\end{picture}")
         return "\n".join(lines)
 
-
-
     def new_document(self):
-        # Destroy all block widgets from the canvas
         for b in self.blocks:
             b.widget.destroy()
         self.blocks.clear()
@@ -192,7 +197,7 @@ class LaTeXEditor:
                     block_dict["type"] = "operation"
                     block_dict["operation"] = b.operation
                 else:
-                    continue  # unknown block type
+                    continue
                 blocks_data.append(block_dict)
             data = {"blocks": blocks_data}
             with open(path, "w", encoding="utf-8") as f:
@@ -221,7 +226,7 @@ class LaTeXEditor:
                 elif typ == "operation":
                     b = OperationBlock(self.editor_canvas, entry.get("operation", "+"), entry.get("font_size", 10))
                 else:
-                    continue  # unknown block type; skip
+                    continue
                 b.widget.place(x=entry.get("x", 0), y=entry.get("y", 0))
                 self.blocks.append(b)
             self.current_file = path
@@ -263,7 +268,6 @@ class LaTeXEditor:
         return "preview.pdf" if os.path.exists("preview.pdf") else None
 
     def preview_latex(self):
-        # Remove any code view widget if it exists
         if self.code_text is not None:
             self.code_text.destroy()
             self.code_text = None
@@ -278,7 +282,6 @@ class LaTeXEditor:
                                          anchor="nw", image=self.preview_image)
 
     def view_code(self):
-        # Generate the LaTeX source code (same as what gets written to preview.tex)
         body = self.gather_latex()
         tex = rf"""\documentclass[letterpaper]{{article}}
 \usepackage[paperwidth=612pt,paperheight=792pt,margin=0pt]{{geometry}}
@@ -297,11 +300,9 @@ class LaTeXEditor:
         self.preview_canvas.create_window(0, 0, anchor="nw", window=self.code_text, width=612, height=792)
 
     def export_pdf(self):
-        # Generate the LaTeX source and compile into a PDF
         pdf = self.compile_latex_to_pdf(self.gather_latex())
         if not pdf:
             return
-        # Prompt the user for a destination filename for the PDF
         export_path = filedialog.asksaveasfilename(defaultextension=".pdf",
                                                    filetypes=[("PDF Files", "*.pdf"), ("All Files", "*.*")])
         if not export_path:

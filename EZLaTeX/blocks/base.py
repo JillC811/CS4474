@@ -1,7 +1,7 @@
 import tkinter as tk
 
-DISPLAY_FONT_SCALE = 0.85
-STANDARD_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36]
+DISPLAY_FONT_SCALE = 1.25
+STANDARD_FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48]
 MODAL_OFFSET = 10
 SNAP_DISTANCE = 10
 VERTICAL_THRESHOLD = 10
@@ -10,9 +10,9 @@ VERTICAL_THRESHOLD = 10
 class Block:
     def __init__(self, master, text="Block", font_size=10):
         self.master, self.text, self.font_size = master, text, font_size
-        display_size = self.font_size if self.font_size <= 16 else int(self.font_size * DISPLAY_FONT_SCALE)
+        display_size = int(self.font_size * DISPLAY_FONT_SCALE)
         self.widget = tk.Label(master, text=text, bg="lightgray", relief="raised",
-                               padx=5, pady=5, font=("Helvetica", display_size), anchor="nw")
+                               padx=0, pady=0, font=("Helvetica", display_size), anchor="nw")
         self.widget.bind("<Button-1>", self.on_click)
         self.widget.bind("<B1-Motion>", self.on_drag)
         self.widget.bind("<Double-Button-1>", self.edit)

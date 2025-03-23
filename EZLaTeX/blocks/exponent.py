@@ -8,7 +8,7 @@ class ExponentBlock(Block):
         super().__init__(master, text=f"{base}^{exponent}", font_size=font_size)
 
     def get_latex(self):
-        return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont $\!\ {self.base}^{{{self.exponent}}}$}}"
+        return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ {self.base}^{{{self.exponent}}}}}"
 
     def update_display(self):
         display = self.font_size if self.font_size <= 16 else int(self.font_size * DISPLAY_FONT_SCALE)
