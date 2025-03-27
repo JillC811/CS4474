@@ -25,9 +25,10 @@ class OperationBlock(Block):
         elif self.operation == "/":
             return ""
         elif self.operation == "(":
-            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ \left(}}"
+            # Return raw commands without font size or math mode delimiters.
+            return r"\left("
         elif self.operation == ")":
-            return rf"{{\fontsize{{{self.font_size}pt}}{{{self.font_size+2}pt}}\selectfont \!\ \right)}}"
+            return r"\right)"
         elif op_lower == "log":
             # If no argument, output just the function name (with optional subscript if base != "10")
             if self.log_argument:

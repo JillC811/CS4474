@@ -184,32 +184,14 @@ class LaTeXEditor:
             first_block = sorted_group[0]
             x = first_block.widget.winfo_x()
             y_inv = 1100 - first_block.widget.winfo_y()
-            wrap_in_parens = (isinstance(sorted_group[0], OperationBlock) and sorted_group[0].operation=="(" and
-                              isinstance(sorted_group[-1], OperationBlock) and sorted_group[-1].operation==")")
-            if wrap_in_parens:
-                sorted_group = sorted_group[1:-1]
-            if any(isinstance(b, OperationBlock) and b.operation == "/" for b in sorted_group):
-                left, right = [], []
-                found_slash = False
-                for b in sorted_group:
-                    if isinstance(b, OperationBlock) and b.operation == "/":
-                        found_slash = True
-                        continue
-                    if not found_slash:
-                        left.append(b)
-                    else:
-                        right.append(b)
-                left_content = "".join(b.get_latex().strip() for b in left)
-                right_content = "".join(b.get_latex().strip() for b in right)
-                combined_expr = rf"\frac{{{left_content}}}{{{right_content}}}"
-            else:
-                combined_expr = "".join(b.get_latex().strip() for b in sorted_group)
-            if wrap_in_parens:
-                combined_expr = rf"\left({combined_expr}\right)"
+            # Simply concatenate the raw LaTeX from each block.
+            combined_expr = "".join(b.get_latex().strip() for b in sorted_group)
+            # Wrap the entire expression in one math mode and font size command.
             combined_wrapped = rf"\fontsize{{{first_block.font_size}pt}}{{{first_block.font_size+2}pt}}\selectfont ${combined_expr}$"
             lines.append(fr"\put({x},{y_inv}){{\makebox(0,0)[lt]{{{combined_wrapped}}}}}")
         lines.append(r"\end{picture}")
         return "\n".join(lines)
+
 
     def new_document(self):
         for b in self.blocks:
